@@ -400,4 +400,43 @@
         }
     });
 
+    /* ----------------------------------------------------------
+       GAMING CARD — Toggle sub-boxes on click
+       ---------------------------------------------------------- */
+    const gamingCard = document.getElementById('gamingCard');
+    const gamingSubboxes = document.getElementById('gamingSubboxes');
+
+    if (gamingCard && gamingSubboxes) {
+        gamingCard.addEventListener('click', (e) => {
+            // Don't toggle if clicking a link inside
+            if (e.target.closest('a')) return;
+            gamingSubboxes.classList.toggle('open');
+            // Scroll sub-boxes into view
+            if (gamingSubboxes.classList.contains('open')) {
+                setTimeout(() => {
+                    gamingSubboxes.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        });
+    }
+
+    /* ----------------------------------------------------------
+       MUSIC CARD — Toggle Spotify Player for "Closer" by The Chainsmokers
+       ---------------------------------------------------------- */
+    const musicCard = document.getElementById('musicCard');
+    const spotifyEmbed = document.getElementById('spotifyEmbed');
+    const nowPlaying = document.getElementById('nowPlaying');
+
+    if (musicCard && spotifyEmbed) {
+        musicCard.addEventListener('click', (e) => {
+            // Don't toggle if interacting directly with the iframe
+            if (e.target.closest('iframe')) return;
+            const isOpen = spotifyEmbed.classList.toggle('visible');
+            if (nowPlaying) {
+                nowPlaying.classList.toggle('visible', isOpen);
+            }
+            musicCard.classList.toggle('playing', isOpen);
+        });
+    }
+
 })();

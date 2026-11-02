@@ -903,7 +903,7 @@ body.cursor-click .cursor-outline {
     box-shadow: 0 0 10px var(--accent);
     transition: width 1.5s var(--ease-out-expo);
 }
-.edu-progress-fill.animate { width: 50%; }
+.edu-progress-fill.animate { width: 25%; }
 .edu-progress-label {
     font-size: 0.8rem;
     color: var(--text-muted);
@@ -1083,6 +1083,153 @@ body.cursor-click .cursor-outline {
 }
 .code-block .kw  { color: var(--accent-purple); }
 .code-block .str { color: var(--accent-green); }
+
+/* ============================================================
+   GAMING SUB-BOXES
+   ============================================================ */
+.gaming-hint,
+.music-hint {
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+/* Gaming sub-boxes container — full width row below the hobbies grid */
+.gaming-subboxes {
+    display: none;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 0;
+}
+.gaming-subboxes.open {
+    display: grid;
+    animation: slideDown 0.4s var(--ease-out-expo) forwards;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.gaming-subbox {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s;
+    cursor: none;
+}
+.gaming-subbox:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+}
+
+.gaming-subbox-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-card);
+    transition: transform 0.6s var(--ease-out-expo);
+}
+.gaming-subbox:hover .gaming-subbox-bg { transform: scale(1.06); }
+
+.gaming-subbox-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(5, 5, 8, 0.35) 0%,
+        rgba(5, 5, 8, 0.85) 100%
+    );
+}
+
+.gaming-subbox-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    width: 100%;
+}
+
+.gaming-subbox-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 0.3rem;
+}
+
+.gaming-subbox-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+
+.gaming-subbox--valorant {
+    border: 1px solid rgba(255, 70, 85, 0.25);
+}
+.gaming-subbox--valorant:hover {
+    border-color: rgba(255, 70, 85, 0.5);
+    box-shadow: 0 0 30px rgba(255, 70, 85, 0.2);
+}
+
+.gaming-subbox--codm {
+    border: 1px solid rgba(249, 115, 22, 0.25);
+}
+.gaming-subbox--codm:hover {
+    border-color: rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.2);
+}
+
+/* ============================================================
+   MUSIC NOW PLAYING
+   ============================================================ */
+.now-playing {
+    display: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 100px;
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    margin-bottom: 0.5rem;
+    width: fit-content;
+}
+.now-playing.visible { display: block; animation: fadeIn 0.4s ease forwards; }
+
+.now-playing-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+}
+
+/* Spotify embed */
+.spotify-embed {
+    display: none;
+    margin-bottom: 0.75rem;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.spotify-embed.visible {
+    display: block;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   GAMING SUB-BOXES RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .gaming-subboxes { grid-template-columns: 1fr; }
+    .gaming-subbox { min-height: 180px; }
+}
 
 /* ============================================================
    CONTACT SECTION
