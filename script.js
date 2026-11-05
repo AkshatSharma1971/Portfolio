@@ -55,7 +55,7 @@
         animateCursor();
 
         // Hover effect on interactive elements
-        const interactiveSelectors = 'a, button, .btn, .skill-card, .hobby-card, .edu-card, .contact-link, .nav-link, .hamburger, input, textarea';
+        const interactiveSelectors = 'a, button, .btn, .skill-card, .project-card, .hobby-card, .edu-card, .contact-link, .nav-link, .hamburger, input, textarea';
         document.addEventListener('mouseover', (e) => {
             if (e.target.closest(interactiveSelectors)) {
                 document.body.classList.add('cursor-hover');
@@ -143,6 +143,9 @@
         update() {
             this.x += this.speedX;
             this.y += this.speedY;
+            // subtle mouse repulsion
+            const mx = this.x - mouseX, my = this.y - mouseY, md = Math.sqrt(mx * mx + my * my);
+            if (md > 0 && md < 120) { const f = (1 - md / 120) * 0.6; this.x += (mx / md) * f; this.y += (my / md) * f; }
             if (this.x < 0 || this.x > canvas.width ||
                 this.y < 0 || this.y > canvas.height) {
                 this.reset();
@@ -208,10 +211,11 @@
        TYPING ANIMATION
        ---------------------------------------------------------- */
     const typingPhrases = [
-        'an Aspiring Software Developer',
-        'an AI & Technology Enthusiast',
+        'a Developer',
+        'an AI Enthusiast',
+        'a Creative Builder',
         'a Problem Solver',
-        'a Gaming Enthusiast'
+        'a Gamer'
     ];
     const typingElement = document.getElementById('typingText');
     let phraseIdx = 0, charIdx = 0, isDeleting = false;
@@ -420,23 +424,6 @@
         });
     }
 
-    /* ----------------------------------------------------------
-       MUSIC CARD — Toggle Spotify Player for "Closer" by The Chainsmokers
-       ---------------------------------------------------------- */
-    const musicCard = document.getElementById('musicCard');
-    const spotifyEmbed = document.getElementById('spotifyEmbed');
-    const nowPlaying = document.getElementById('nowPlaying');
-
-    if (musicCard && spotifyEmbed) {
-        musicCard.addEventListener('click', (e) => {
-            // Don't toggle if interacting directly with the iframe
-            if (e.target.closest('iframe')) return;
-            const isOpen = spotifyEmbed.classList.toggle('visible');
-            if (nowPlaying) {
-                nowPlaying.classList.toggle('visible', isOpen);
-            }
-            musicCard.classList.toggle('playing', isOpen);
-        });
-    }
+    /* MUSIC CARD + player: see features.js */
 
 })();
