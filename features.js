@@ -30,6 +30,7 @@
             imageFullSize: [1600, 489],
             github: null,        // TODO: add the repo URL (leave null to hide the button)
             demo: 'https://cloud-ark.vercel.app/',
+            status: null,        // Gaming theme label, ONLY if true: 'MISSION COMPLETED' | 'CURRENT PROJECT' | 'EXPERIMENTAL BUILD'
             placeholder: false   // true = shows "draft" label and "add me" hints
         }
     ];
@@ -192,12 +193,14 @@
         const card = el('article', 'project-card reveal-up', `
             <div class="pimg">${imgHTML(p, false)}</div>
             <div class="pbody">
+                ${p.status ? `<span class="pstatus">${esc(p.status)}</span>` : ''}
                 <span class="pcat">${esc(p.category)}${p.placeholder ? ' · draft' : ''}</span>
                 <h3>${esc(p.title)}</h3>
                 <p>${esc(p.description)}</p>
                 <div class="tags">${techHTML(p)}</div>
                 <div class="pbtns">${linkBtn(p.github, 'GitHub', '', p.placeholder)}${linkBtn(p.demo, 'Live Demo', 'pbtn--main', p.placeholder)}</div>
             </div>`);
+        card.dataset.file = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.project.js'; card.dataset.track = String(i + 1).padStart(2, '0');
         card.tabIndex = 0; card.setAttribute('role', 'button'); card.setAttribute('aria-haspopup', 'dialog');
         card.setAttribute('aria-label', `${p.title}: view details`);
         card.style.transitionDelay = (i * 0.08) + 's';
@@ -331,4 +334,5 @@
         new IntersectionObserver((en) => { cardVisible = en[0].isIntersecting; syncMini(); }, { threshold: 0.3 }).observe(card);
         document.addEventListener('visibilitychange', () => { /* visual loop is pure CSS, paused via .is-playing; nothing to cancel */ });
     }
+    window.PORTFOLIO = { PROJECTS: PROJECTS, TIMELINE: TIMELINE, CONFIG: CONFIG };   // shared data for themes.js (terminal etc.)
 })();

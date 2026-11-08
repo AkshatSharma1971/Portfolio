@@ -10,15 +10,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="features.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="swarm.css">
+    <link rel="stylesheet" href="themes.css">
+    <script>
+        /* ===== THEME SETTINGS (edit me) =====
+           defaultTheme = what FIRST-TIME visitors see: 'default' | 'gaming' | 'music' | 'coding'.
+           Returning visitors get their last choice (localStorage key: portfolioTheme). */
+        window.THEME_CONFIG = { defaultTheme: 'default', storageKey: 'portfolioTheme' };
+        (function () {
+            var C = window.THEME_CONFIG, t = null;
+            try { t = localStorage.getItem(C.storageKey); } catch (e) {}
+            document.documentElement.setAttribute('data-theme', ['default', 'gaming', 'music', 'coding'].indexOf(t) > -1 ? t : C.defaultTheme);
+        })();
+    </script>
+    <script>
+        /* AI Swarm intro gate: plays once per browser tab; skipped for reduced-motion. Failsafe removes it after 14s. */
+        try {
+            if (!sessionStorage.getItem('swarmSeen') && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.documentElement.classList.add('swarm-on');
+                setTimeout(function () { document.documentElement.classList.remove('swarm-on'); }, 14000);
+            }
+        } catch (e) {}
+    </script>
 </head>
 <body>
     <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div id="swarm" role="region" aria-label="Intro animation: a simulated AI swarm assembling this portfolio" hidden></div>
     <!-- Custom Cursor -->
     <div class="cursor-dot" id="cursorDot"></div>
     <div class="cursor-outline" id="cursorOutline"></div>
 
     <!-- Particle Canvas -->
     <canvas id="particlesCanvas"></canvas>
+    <canvas id="themeBg" aria-hidden="true"></canvas>
+    <div id="themeFx" aria-hidden="true"></div>
 
     <!-- Click Ripple Container -->
     <div id="clickRippleContainer"></div>
@@ -36,8 +62,10 @@
                 <a href="#projects" class="nav-link" data-section="projects">Projects</a>
                 <a href="#education" class="nav-link" data-section="education">Journey</a>
                 <a href="#hobbies" class="nav-link" data-section="hobbies">Hobbies</a>
+                <a href="#terminal" class="nav-link theme-only theme-only-coding" data-section="terminal">Terminal</a>
                 <a href="#contact" class="nav-link" data-section="contact">Contact</a>
             </div>
+            <div class="theme-switcher" id="themeSwitcher"></div>
             <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
@@ -343,6 +371,18 @@
     </section>
 
     <!-- ==================== CONTACT SECTION ==================== -->
+    <!-- ==================== TERMINAL (Coding theme only) ==================== -->
+    <section id="terminal" class="section term-section theme-only theme-only-coding" aria-label="Interactive terminal">
+        <div class="container">
+            <h2 class="section-heading"><span class="heading-accent">$</span> Terminal</h2>
+            <div class="term" id="term">
+                <div class="term-bar"><i></i><i></i><i></i><span>akshat@portfolio: ~</span></div>
+                <div class="term-out" id="termOut" role="log" aria-live="polite"></div>
+                <label class="term-line"><span class="term-ps">akshat@portfolio:~$</span><input id="termIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command"></label>
+            </div>
+        </div>
+    </section>
+
     <section id="contact" class="section">
         <div class="container">
             <h2 class="section-heading reveal-up">
@@ -420,12 +460,15 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 Akshat Sharma. All rights reserved.</p>
+                <button type="button" class="replay-intro" id="replayIntro">&#8635; Replay intro</button>
             </div>
         </div>
     </footer>
 
     <script src="script.js"></script>
     <script src="features.js"></script>
+    <script src="themes.js"></script>
+    <script src="swarm.js"></script>
 </body>
 </html>
 
