@@ -360,7 +360,7 @@
        3D TILT EFFECT ON CARDS
        ---------------------------------------------------------- */
     if (!isTouchDevice()) {
-        const tiltCards = document.querySelectorAll('[data-tilt]');
+        const tiltCards = document.querySelectorAll('[data-tilt]:not(.skill-card)');
         tiltCards.forEach((card) => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();

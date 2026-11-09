@@ -251,88 +251,23 @@
     addEventListener('resize', onScroll, { passive: true });
     onScroll();
 
-    /* ============ 4. MUSIC PLAYER ============ */
-    const card = $('musicCard'), embed = $('spotifyEmbed'), openBtn = $('mpOpen');
-    if (card && embed) {
-        const trackId = CONFIG.music.uri.split(':')[2];
-        $('mpTitle').textContent = CONFIG.music.title; $('mpArtist').textContent = CONFIG.music.artist;
-        const ICO_PLAY = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        const ICO_PAUSE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
-        const fmt = (ms) => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
-        const toggle = $('mpToggle'); toggle.innerHTML = ICO_PLAY;
-        let ctrl = null, playing = false, apiRequested = false, dismissed = false, cardVisible = false, minimized = false;
-
-        // Floating mini player
-        const mini = el('div', 'mini', `
-            <button class="mini-orb" aria-label="Expand music player"><span class="viz" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
-            <div class="mini-main"><div class="mini-meta"><strong></strong><span></span></div>
-                <button class="mp-btn mini-play" aria-label="Play"></button>
-                <button class="mini-x" data-act="min" aria-label="Minimize music player">&minus;</button>
-                <button class="mini-x" data-act="close" aria-label="Dismiss music player">&times;</button></div>`);
-        mini.querySelector('strong').textContent = CONFIG.music.title; mini.querySelector('.mini-meta span').textContent = CONFIG.music.artist;
-        const miniPlay = mini.querySelector('.mini-play'); miniPlay.innerHTML = ICO_PLAY;
-        document.body.appendChild(mini);
-
-        const syncMini = () => {
-            const show = embed.classList.contains('visible') && !dismissed && !cardVisible;
-            mini.classList.toggle('show', show); mini.classList.toggle('min', minimized);
+    /* ============ 5. SKILL CARD TILT (one implementation for ALL cards) ============
+       Root cause of the old bug: the scroll-in stagger put transition-delay (0.08s..0.4s) on cards 2-6,
+       which also delayed every tilt update, so those cards barely moved. `.tilt-ready` removes the delay once a card is touched. */
+    document.querySelectorAll('.skill-card').forEach(function (c) {
+        c.classList.add('tilt');
+        if (reduce) return;
+        var set = function (e) {
+            var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+            c.style.setProperty('--rx', ((0.5 - y) * 11).toFixed(2) + 'deg'); c.style.setProperty('--ry', ((x - 0.5) * 11).toFixed(2) + 'deg');
+            c.style.setProperty('--mx', (x * 100).toFixed(1) + '%'); c.style.setProperty('--my', (y * 100).toFixed(1) + '%');
         };
-        const render = () => {
-            card.classList.toggle('is-playing', playing); mini.classList.toggle('is-playing', playing);
-            const label = playing ? 'Pause' : 'Play', ico = playing ? ICO_PAUSE : ICO_PLAY;
-            [toggle, miniPlay].forEach((b) => { b.innerHTML = ico; b.setAttribute('aria-label', label); });
-            syncMini();
-        };
-        const doToggle = () => { if (ctrl) ctrl.togglePlay(); };
-        toggle.addEventListener('click', (e) => { e.stopPropagation(); doToggle(); });
-        miniPlay.addEventListener('click', doToggle);
-        mini.addEventListener('click', (e) => {
-            const a = e.target.closest('[data-act]'), orb = e.target.closest('.mini-orb');
-            if (a && a.dataset.act === 'min') minimized = true;
-            if (a && a.dataset.act === 'close') dismissed = true;
-            if (orb) minimized = false;
-            syncMini();
-        });
+        var reset = function () { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); c.classList.remove('touching'); };
+        c.addEventListener('pointerenter', function () { c.classList.add('tilt-ready'); });
+        c.addEventListener('pointermove', function (e) { if (e.pointerType !== 'touch') set(e); else if (c.classList.contains('touching')) set(e); });
+        c.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch') { c.classList.add('tilt-ready', 'touching'); set(e); } });   // touch: tilt toward the finger
+        ['pointerleave', 'pointerup', 'pointercancel'].forEach(function (ev) { c.addEventListener(ev, reset); });
+    });
 
-        // Spotify iFrame API: the supported way to read playback state from the embed
-        function loadApi() {
-            if (apiRequested) return; apiRequested = true;
-            fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent('https://open.spotify.com/track/' + trackId))
-                .then((r) => r.json()).then((j) => {
-                    if (!j.thumbnail_url) return;
-                    const im = new Image(); im.alt = ''; im.width = im.height = 56; im.src = j.thumbnail_url;
-                    im.onload = () => { $('mpArtBox').replaceChildren(im); };
-                }).catch(() => {});
-            window.onSpotifyIframeApiReady = (API) => {
-                const host = $('spotifyHost'); host.innerHTML = '<div></div>';
-                API.createController(host.firstChild, { uri: CONFIG.music.uri, width: '100%', height: 80 }, (c) => {
-                    ctrl = c; toggle.disabled = false; $('mpNote').textContent = 'Playback is handled by Spotify (guests may hear a preview).';
-                    c.addListener('playback_update', (e) => {
-                        const d = e.data; playing = !d.isPaused && !d.isBuffering ? true : (!d.isPaused);
-                        const pct = d.duration ? Math.min(100, (d.position / d.duration) * 100) : 0;
-                        $('mpFill').style.transform = `scaleX(${pct / 100})`;
-                        $('mpBar').setAttribute('aria-valuenow', Math.round(pct));
-                        $('mpCur').textContent = fmt(d.position); $('mpDur').textContent = fmt(d.duration);
-                        render();
-                    });
-                });
-            };
-            const s = document.createElement('script');
-            s.src = 'https://open.spotify.com/embed/iframe-api/v1'; s.async = true;
-            s.onerror = () => { $('mpNote').textContent = 'Custom controls are unavailable. Use the Spotify player below.'; };
-            document.head.appendChild(s);
-        }
-
-        const setOpen = (open) => {
-            embed.classList.toggle('visible', open); card.classList.toggle('playing', open);
-            openBtn.setAttribute('aria-expanded', open); openBtn.textContent = open ? 'Close player' : 'Open player';
-            if (open) loadApi();
-            syncMini();
-        };
-        card.addEventListener('click', (e) => { if (e.target.closest('.music-player, .mp-open')) return; setOpen(!embed.classList.contains('visible')); });
-        openBtn.addEventListener('click', (e) => { e.stopPropagation(); setOpen(!embed.classList.contains('visible')); });
-        new IntersectionObserver((en) => { cardVisible = en[0].isIntersecting; syncMini(); }, { threshold: 0.3 }).observe(card);
-        document.addEventListener('visibilitychange', () => { /* visual loop is pure CSS, paused via .is-playing; nothing to cancel */ });
-    }
     window.PORTFOLIO = { PROJECTS: PROJECTS, TIMELINE: TIMELINE, CONFIG: CONFIG };   // shared data for themes.js (terminal etc.)
 })();
